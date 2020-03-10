@@ -52,7 +52,7 @@ loopthroughblacklists() {
 error() {
 
   echo $0 error: $1 >&2
-  exit 2
+  exit 1
 }
 
 
