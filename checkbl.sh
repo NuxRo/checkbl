@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
-
-# this is a simplified version of https://github.com/adionditsak/blacklist-check-unix-linux-utility.git
+# simplified version of https://github.com/adionditsak/blacklist-check-unix-linux-utility
 
 #### main ####
 main() {
 
-  [ $# -ne 1 ] && error "Please specify an IP as a parameter."
-  
+  [ $# -ne 1 ] && error "Please specify a FQDN or IP as a parameter."
+
+    reverseit $1 "IP not valid."
+
   loopthroughblacklists $1
-  
+}
+
 #### reverseit ####
 reverseit() {
 
@@ -23,12 +25,12 @@ reverseit() {
   fi
 }
 
-
 #### loopthroughblacklists ####
 loopthroughblacklists() {
 
   reverse_dns=$(dig +short -x $1)
-  
+
+
   for bl in ${blacklists} ; do
 
       listed="$(dig +short -t a ${reverse}.${bl}.)"
@@ -36,15 +38,24 @@ loopthroughblacklists() {
       if [[ $listed ]]; then
 
         if [[ $listed == *"timed out"* ]]; then
-           continue
+
+	   continue
         else
-        exit 2
+        
+	  exit 2
         fi
       fi
   done
 }
 
-#### blacklists - grabbed from https://hetrixtools.com/blacklist-check ####
+#### error ####
+error() {
+
+  echo $0 error: $1 >&2
+  exit 2
+}
+
+
 blacklists="
 b.barracudacentral.org
 bb.barracudacentral.org
@@ -53,9 +64,9 @@ bl.spamcop.net
 cbl.abuseat.org
 zen.spamhaus.org
 sip.invalument.com
-#rbl.megarbl.net
+rbl.megarbl.net
 "
-#rbl.megarbl.net - this one always lists any Ip, either by error or intention is a good way to test a listing
+#rbl.megarbl.net - this one always lists blacklisted, by intention or mistake it's a good way to test, but remove it in production
 
 
 ### initiate script ###
